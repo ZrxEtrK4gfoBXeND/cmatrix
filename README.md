@@ -112,6 +112,17 @@ cmatrix -ba -u 2 -C red
 For more options and **help** run `cmatrix -h` <br>OR<br> Read Manual Page by running command `man cmatrix`
 
 _To get the program to look most like the movie, use `cmatrix -lba`_
+
+#### 🔹 Japanese characters (`-c`)
+
+`cmatrix -c` prints the movie's half-width katakana (U+FF66–U+FF9D). For it to display correctly you need all three of:
+
+1. **Wide-character ncurses** — build with CMake (links `ncursesw`); the `./configure` path links plain `ncurses`, which cannot print wide characters.
+2. **A UTF-8 locale** — `locale` should report e.g. `en_GB.UTF-8` (set via `raspi-config` on Raspberry Pi).
+3. **A font containing half-width katakana** in whatever renders the text — a desktop terminal with `fonts-noto-cjk` installed, `fbterm`/`kmscon` on the framebuffer, or your SSH client's font. The raw Linux text console cannot display katakana (256/512-glyph limit); use `cmatrix -lba` with the bundled `matrix.psf.gz` console font there instead.
+
+Sanity check: `echo "ｱｲｳｴｵ"` — if katakana appears, `cmatrix -c` will work.
+
 _To get the program to look most like the Win/Mac screensaver, use `cmatrix -ol`_
 
 > :round_pushpin: _Note: cmatrix is probably not particularly portable or efficient, but it won't hog
