@@ -310,6 +310,29 @@ void resize_screen(void) {
     refresh();
 }
 
+/* Return a brighter variant of a 256-color palette index, used to emulate
+ * bold for extended colors, where the terminal's bold attribute has no
+ * bright twin the way the basic eight colors do. */
+static int brighten(int color) {
+    int r, g, b;
+    if (color < 8) {
+        return color + 8;
+    }
+    if (color >= 232 && color <= 255) {         /* grayscale ramp */
+        return color + 6 > 255 ? 231 : color + 6;
+    }
+    if (color >= 16 && color <= 231) {          /* 6x6x6 color cube */
+        r = (color - 16) / 36;
+        g = ((color - 16) / 6) % 6;
+        b = (color - 16) % 6;
+        if (r < 5) r++;
+        if (g < 5) g++;
+        if (b < 5) b++;
+        return 16 + 36 * r + 6 * g + b;
+    }
+    return color;
+}
+
 /* Pick a random character for a matrix stream. In classic (-c) mode,
  * mix numerals and a few symbols in with the katakana, as in the movie.
  * Roughly 30% of characters come from the extras set. */
@@ -338,6 +361,7 @@ int main(int argc, char *argv[]) {
     int update = 4;
     int highnum = 0;
     int mcolor = COLOR_GREEN;
+    int mbright = COLOR_GREEN;
     int rainbow = 0;
     int lambda = 0;
     int randnum = 0;
@@ -557,10 +581,18 @@ if (console) {
             c_die(" This color needs a 256-color terminal.\n"
                   " Under fbterm, run:  TERM=fbterm cmatrix ...\n");
         }
+        mbright = brighten(mcolor);
 #ifdef HAVE_USE_DEFAULT_COLORS
-        init_pair(mcolor, mcolor, use_default_colors() != ERR ? -1 : COLOR_BLACK);
+        if (use_default_colors() != ERR) {
+            init_pair(mcolor, mcolor, -1);
+            init_pair(mbright, mbright, -1);
+        } else {
+            init_pair(mcolor, mcolor, COLOR_BLACK);
+            init_pair(mbright, mbright, COLOR_BLACK);
+        }
 #else
         init_pair(mcolor, mcolor, COLOR_BLACK);
+        init_pair(mbright, mbright, COLOR_BLACK);
 #endif
     }
 
@@ -812,8 +844,9 @@ if (console) {
                     if (console || xwindow) {
                         attron(A_ALTCHARSET);
                     }
-                    /* Head character follows the matrix color (-C) instead of white */
-                    attron(COLOR_PAIR(mcolor));
+                    /* Head character follows the matrix color (-C) instead of white.
+                     * With an extended color, emulate bold with a brighter shade. */
+                    attron(COLOR_PAIR(bold && mcolor > 7 ? mbright : mcolor));
                     if (bold) {
                         attron(A_BOLD);
                     }
@@ -835,7 +868,7 @@ if (console) {
                         addwstr(char_array);
                     }
 
-                    attroff(COLOR_PAIR(mcolor));
+                    attroff(COLOR_PAIR(bold && mcolor > 7 ? mbright : mcolor));
                     if (bold) {
                         attroff(A_BOLD);
                     }
@@ -870,11 +903,19 @@ if (console) {
                     attron(COLOR_PAIR(mcolor));
                     if (matrix[i][j].val == 1) {
                         if (bold) {
+                            if (mcolor > 7) {
+                                attroff(COLOR_PAIR(mcolor));
+                                attron(COLOR_PAIR(mbright));
+                            }
                             attron(A_BOLD);
                         }
                         addch('|');
                         if (bold) {
                             attroff(A_BOLD);
+                            if (mcolor > 7) {
+                                attroff(COLOR_PAIR(mbright));
+                                attron(COLOR_PAIR(mcolor));
+                            }
                         }
                     } else {
                         if (console || xwindow) {
@@ -882,6 +923,10 @@ if (console) {
                         }
                         if (bold == 2 ||
                             (bold == 1 && matrix[i][j].val % 2 == 0)) {
+                            if (mcolor > 7) {
+                                attroff(COLOR_PAIR(mcolor));
+                                attron(COLOR_PAIR(mbright));
+                            }
                             attron(A_BOLD);
                         }
                         if (matrix[i][j].val == -1) {
@@ -902,6 +947,10 @@ if (console) {
                         if (bold == 2 ||
                             (bold == 1 && matrix[i][j].val % 2 == 0)) {
                             attroff(A_BOLD);
+                            if (mcolor > 7) {
+                                attroff(COLOR_PAIR(mbright));
+                                attron(COLOR_PAIR(mcolor));
+                            }
                         }
                         if (console || xwindow) {
                             attroff(A_ALTCHARSET);

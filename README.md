@@ -109,7 +109,7 @@ Example:
 cmatrix -ba -u 2 -C red
 ```
 
-Beyond the basic eight colors, `-C` accepts `orange`, `purple`, `pink`, `grey`, or any 256-color palette number (0–255). These need a 256-color terminal — under fbterm, run with `TERM=fbterm`:
+Beyond the basic eight colors, `-C` accepts `orange`, `purple`, `pink`, `grey`, or any 256-color palette number (0–255). These need a 256-color terminal — under fbterm, run with `TERM=fbterm`. With extended colors, bold (`-b`/`-B`) is emulated by automatically picking a brighter shade of the chosen color:
 
 ```
 TERM=fbterm cmatrix -c -b -C orange
