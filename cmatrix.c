@@ -314,7 +314,10 @@ void resize_screen(void) {
  * mix numerals and a few symbols in with the katakana, as in the movie.
  * Roughly 30% of characters come from the extras set. */
 static int newchar(int classic, int randnum, int randmin) {
-    static const wchar_t extras[] = L"0123456789Z:.\"=*+-<>";
+    static const wchar_t extras[] = L"0123456789"
+                                    L"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                                    L"abcdefghijklmnopqrstuvwxyz"
+                                    L":.\"=*+-<>";
     if (classic && rand() % 10 < 3) {
         return extras[rand() % (sizeof(extras) / sizeof(extras[0]) - 1)];
     }
