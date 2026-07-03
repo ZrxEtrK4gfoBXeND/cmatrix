@@ -115,7 +115,7 @@ _To get the program to look most like the movie, use `cmatrix -lba`_
 
 #### 🔹 Japanese characters (`-c`)
 
-`cmatrix -c` prints the movie's half-width katakana (U+FF66–U+FF9D). For it to display correctly you need all three of:
+`cmatrix -c` prints the movie's half-width katakana (U+FF66–U+FF9D), mixed with numerals and symbols as seen in the film (roughly 30% of characters). For it to display correctly you need all three of:
 
 1. **Wide-character ncurses** — build with CMake (links `ncursesw`); the `./configure` path links plain `ncurses`, which cannot print wide characters.
 2. **A UTF-8 locale** — `locale` should report e.g. `en_GB.UTF-8` (set via `raspi-config` on Raspberry Pi).

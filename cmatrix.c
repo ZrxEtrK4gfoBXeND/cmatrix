@@ -310,6 +310,17 @@ void resize_screen(void) {
     refresh();
 }
 
+/* Pick a random character for a matrix stream. In classic (-c) mode,
+ * mix numerals and a few symbols in with the katakana, as in the movie.
+ * Roughly 30% of characters come from the extras set. */
+static int newchar(int classic, int randnum, int randmin) {
+    static const wchar_t extras[] = L"0123456789Z:.\"=*+-<>";
+    if (classic && rand() % 10 < 3) {
+        return extras[rand() % (sizeof(extras) / sizeof(extras[0]) - 1)];
+    }
+    return (int) rand() % randnum + randmin;
+}
+
 int main(int argc, char *argv[]) {
     int i, y, z, optchr, keypress;
     int j = 0;
@@ -665,7 +676,7 @@ if (console) {
                     for (i = LINES - 1; i >= 1; i--) {
                         matrix[i][j].val = matrix[i - 1][j].val;
                     }
-                    random = (int) rand() % (randnum + 8) + randmin;
+                    random = newchar(classic, randnum, randmin);
 
                     if (matrix[1][j].val == 0) {
                         matrix[0][j].val = 1;
@@ -682,14 +693,14 @@ if (console) {
                             if (((int) rand() % 3) == 1) {
                                 matrix[0][j].val = 0;
                             } else {
-                                matrix[0][j].val = (int) rand() % randnum + randmin;
+                                matrix[0][j].val = newchar(classic, randnum, randmin);
                             }
                             spaces[j] = (int) rand() % LINES + 1;
                         }
                     } else if (random > highnum && matrix[1][j].val != 1) {
                         matrix[0][j].val = ' ';
                     } else {
-                        matrix[0][j].val = (int) rand() % randnum + randmin;
+                        matrix[0][j].val = newchar(classic, randnum, randmin);
                     }
 
                 } else { /* New style scrolling (default) */
@@ -699,7 +710,7 @@ if (console) {
                     } else if (matrix[0][j].val == -1
                         && matrix[1][j].val == ' ') {
                         length[j] = (int) rand() % (LINES - 3) + 3;
-                        matrix[0][j].val = (int) rand() % randnum + randmin;
+                        matrix[0][j].val = newchar(classic, randnum, randmin);
 
                         spaces[j] = (int) rand() % LINES + 1;
                     }
@@ -726,7 +737,7 @@ if (console) {
                             matrix[i][j].is_head = false;
                             if (changes) {
                                 if (rand() % 8 == 0)
-                                    matrix[i][j].val = (int) rand() % randnum + randmin;
+                                    matrix[i][j].val = newchar(classic, randnum, randmin);
                             }
                             i++;
                             y++;
@@ -737,7 +748,7 @@ if (console) {
                             continue;
                         }
 
-                        matrix[i][j].val = (int) rand() % randnum + randmin;
+                        matrix[i][j].val = newchar(classic, randnum, randmin);
                         matrix[i][j].is_head = true;
 
                         /* If we're at the top of the column and it's reached its
