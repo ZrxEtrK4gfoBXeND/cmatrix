@@ -780,7 +780,8 @@ if (console) {
                     if (console || xwindow) {
                         attron(A_ALTCHARSET);
                     }
-                    attron(COLOR_PAIR(COLOR_WHITE));
+                    /* Head character follows the matrix color (-C) instead of white */
+                    attron(COLOR_PAIR(mcolor));
                     if (bold) {
                         attron(A_BOLD);
                     }
@@ -802,7 +803,7 @@ if (console) {
                         addwstr(char_array);
                     }
 
-                    attroff(COLOR_PAIR(COLOR_WHITE));
+                    attroff(COLOR_PAIR(mcolor));
                     if (bold) {
                         attroff(A_BOLD);
                     }
