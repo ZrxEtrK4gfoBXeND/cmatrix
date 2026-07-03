@@ -109,6 +109,12 @@ Example:
 cmatrix -ba -u 2 -C red
 ```
 
+Beyond the basic eight colors, `-C` accepts `orange`, `purple`, `pink`, `grey`, or any 256-color palette number (0–255). These need a 256-color terminal — under fbterm, run with `TERM=fbterm`:
+
+```
+TERM=fbterm cmatrix -c -b -C orange
+```
+
 For more options and **help** run `cmatrix -h` <br>OR<br> Read Manual Page by running command `man cmatrix`
 
 _To get the program to look most like the movie, use `cmatrix -lba`_

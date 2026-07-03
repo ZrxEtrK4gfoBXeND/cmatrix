@@ -163,7 +163,7 @@ void usage(void) {
     printf(" -V: Print version information and exit\n");
     printf(" -M [message]: Prints your message in the center of the screen. Overrides -L's default message.\n");
     printf(" -u delay (0 - 10, default 4): Screen update delay\n");
-    printf(" -C [color]: Use this color for matrix (default green)\n");
+    printf(" -C [color]: Use this color for matrix (default green). Named colors, or 0-255\n");
     printf(" -r: rainbow mode\n");
     printf(" -m: lambda mode\n");
     printf(" -k: Characters change while scrolling. (Works without -o opt.)\n");
@@ -386,10 +386,25 @@ int main(int argc, char *argv[]) {
                 mcolor = COLOR_MAGENTA;
             } else if (!strcasecmp(optarg, "black")) {
                 mcolor = COLOR_BLACK;
+            } else if (!strcasecmp(optarg, "orange")) {
+                mcolor = 208;
+            } else if (!strcasecmp(optarg, "purple")) {
+                mcolor = 129;
+            } else if (!strcasecmp(optarg, "pink")) {
+                mcolor = 205;
+            } else if (!strcasecmp(optarg, "grey") || !strcasecmp(optarg, "gray")) {
+                mcolor = 244;
+            } else if (*optarg != '\0' && strspn(optarg, "0123456789") == strlen(optarg)
+                       && atoi(optarg) <= 255) {
+                /* Any 256-color palette index, e.g. -C 208 */
+                mcolor = atoi(optarg);
             } else {
                 c_die(" Invalid color selection\n Valid "
                        "colors are green, red, blue, "
-                       "white, yellow, cyan, magenta " "and black.\n");
+                       "white, yellow, cyan, magenta, black,\n"
+                       " orange, purple, pink, grey, or a 256-color "
+                       "palette number (0-255).\n Colors beyond the basic eight "
+                       "need a 256-color terminal (e.g. TERM=fbterm).\n");
             }
             break;
         case 'c':
@@ -533,6 +548,20 @@ if (console) {
             init_pair(COLOR_BLUE, COLOR_BLUE, COLOR_BLACK);
             init_pair(COLOR_YELLOW, COLOR_YELLOW, COLOR_BLACK);
         }
+    }
+
+    /* Extended 256-color palette (e.g. -C orange). Pair number matches the
+     * color number, the same convention as the basic colors above. */
+    if (mcolor > 7) {
+        if (!has_colors() || COLORS < 256) {
+            c_die(" This color needs a 256-color terminal.\n"
+                  " Under fbterm, run:  TERM=fbterm cmatrix ...\n");
+        }
+#ifdef HAVE_USE_DEFAULT_COLORS
+        init_pair(mcolor, mcolor, use_default_colors() != ERR ? -1 : COLOR_BLACK);
+#else
+        init_pair(mcolor, mcolor, COLOR_BLACK);
+#endif
     }
 
     /* Set up values for random number generation */
